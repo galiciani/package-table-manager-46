@@ -19,9 +19,24 @@ interface NavLinkProps {
   label: string;
   isActive: boolean;
   onClick?: () => void;
+  external?: boolean;
 }
 
-const NavLink = ({ to, icon, label, isActive, onClick }: NavLinkProps) => {
+const NavLink = ({ to, icon, label, isActive, onClick, external }: NavLinkProps) => {
+  // If it's an external link that shouldn't use the Layout, render a regular <a> tag
+  if (external) {
+    return (
+      <a
+        href={to}
+        className={`flex items-center p-2 rounded-lg hover:bg-gray-100 text-gray-700`}
+        onClick={onClick}
+      >
+        <div className="mr-3">{icon}</div>
+        <span>{label}</span>
+      </a>
+    );
+  }
+  
   return (
     <Link
       to={to}
@@ -123,6 +138,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 label="Ver Tabelas (Visualização)"
                 isActive={false}
                 onClick={closeSidebar}
+                external={true}
               />
             </div>
           </div>
