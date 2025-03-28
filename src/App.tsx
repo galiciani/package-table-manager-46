@@ -15,6 +15,7 @@ import Tables from "./pages/Tables";
 import Search from "./pages/Search";
 import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
+import ViewerLanding from "./pages/ViewerLanding";
 
 const queryClient = new QueryClient();
 
@@ -30,12 +31,19 @@ const App = () => (
               <Routes>
                 <Route path="/login" element={<Login />} />
                 
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    {(user) => user?.role === 'viewer' 
+                      ? <ViewerLanding /> 
+                      : <Navigate to="/dashboard" replace />
+                    }
+                  </ProtectedRoute>
+                } />
                 
                 <Route 
                   path="/dashboard" 
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['admin', 'editor']}>
                       <Dashboard />
                     </ProtectedRoute>
                   } 
@@ -44,7 +52,7 @@ const App = () => (
                 <Route 
                   path="/tables" 
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['admin', 'editor']}>
                       <Tables />
                     </ProtectedRoute>
                   } 
@@ -53,7 +61,7 @@ const App = () => (
                 <Route 
                   path="/search" 
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['admin', 'editor']}>
                       <Search />
                     </ProtectedRoute>
                   } 

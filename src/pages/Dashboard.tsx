@@ -1,5 +1,6 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useTableData } from '../context/TableContext';
 import { useUserData } from '../context/UserContext';
@@ -18,6 +19,11 @@ const Dashboard = () => {
   const { tables } = useTableData();
   const { users } = useUserData();
   const { user } = useAuth();
+  
+  // Redirect viewers to the landing page
+  if (user?.role === 'viewer') {
+    return <Navigate to="/" replace />;
+  }
   
   const isAdmin = user?.role === 'admin';
   const totalProducts = tables.reduce((sum, table) => sum + table.rows.length, 0);
@@ -71,7 +77,6 @@ const Dashboard = () => {
                 <h3 className="mt-1 text-xl font-semibold">
                   {user?.role === 'admin' && 'Administrador'}
                   {user?.role === 'editor' && 'Editor'}
-                  {user?.role === 'viewer' && 'Visualizador'}
                 </h3>
               </div>
               <div className="rounded-full bg-blue-100 p-3 text-blue-600">

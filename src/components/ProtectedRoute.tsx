@@ -1,9 +1,10 @@
 
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { User } from '../context/AuthContext';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
+  children: React.ReactNode | ((user: User) => React.ReactNode);
   allowedRoles?: string[];
 }
 
@@ -15,7 +16,11 @@ const ProtectedRoute = ({ children, allowedRoles = [] }: ProtectedRouteProps) =>
   }
 
   if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/" replace />;
+  }
+
+  if (typeof children === 'function') {
+    return <>{children(user!)}</>;
   }
 
   return <>{children}</>;
