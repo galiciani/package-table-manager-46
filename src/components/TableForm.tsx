@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useTableData, TableData, Column } from '../context/TableContext';
 import { Plus, Trash2, X } from 'lucide-react';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 interface TableFormProps {
   initialData?: TableData;
@@ -36,7 +35,6 @@ const TableForm = ({ initialData, onCancel }: TableFormProps) => {
     
     setColumns([...columns, { id: newId, name: newColumnName, accessor }]);
     
-    // Add this new column with empty values to all existing rows
     setRows(prevRows => 
       prevRows.map(row => ({
         ...row,
@@ -51,7 +49,6 @@ const TableForm = ({ initialData, onCancel }: TableFormProps) => {
     
     setColumns(columns.filter(c => c.id !== id));
     
-    // Remove this column from all rows
     setRows(prevRows => 
       prevRows.map(row => {
         const newRow = { ...row };
@@ -72,7 +69,6 @@ const TableForm = ({ initialData, onCancel }: TableFormProps) => {
     
     setColumns(newColumns);
     
-    // If accessor changed, update rows
     if (field === 'accessor' && oldAccessor !== value) {
       setRows(prevRows => 
         prevRows.map(row => {
@@ -88,7 +84,6 @@ const TableForm = ({ initialData, onCancel }: TableFormProps) => {
   };
 
   const handleRowAdd = () => {
-    // Create an empty row with all columns
     const newRow: Record<string, string> = {};
     columns.forEach(col => {
       newRow[col.accessor] = '';
@@ -231,7 +226,7 @@ const TableForm = ({ initialData, onCancel }: TableFormProps) => {
                 {column.name}
               </div>
             ))}
-            <div></div> {/* Space for delete button */}
+            <div></div>
           </div>
           
           {rows.map((row, rowIndex) => (
