@@ -9,7 +9,8 @@ import {
   Search, 
   Menu, 
   X, 
-  LogOut 
+  LogOut,
+  Eye
 } from 'lucide-react';
 
 interface NavLinkProps {
@@ -115,6 +116,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   onClick={closeSidebar}
                 />
               )}
+              
+              <NavLink
+                to="/"
+                icon={<Eye size={20} />}
+                label="Ver Tabelas (Visualização)"
+                isActive={false}
+                onClick={closeSidebar}
+              />
             </div>
           </div>
 
