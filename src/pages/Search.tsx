@@ -12,7 +12,7 @@ const Search = () => {
   const { searchProduct, showGridLines, toggleGridLines, isLoading, error } = useTableData();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedTerm, setDebouncedTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<ReturnType<typeof searchProduct> extends Promise<infer R> ? R : never>([]);
+  const [searchResults, setSearchResults] = useState<{ tableId: string, tableName: string, rows: Record<string, string | number>[] }[]>([]);
   const [searching, setSearching] = useState(false);
 
   // Debounce search term

@@ -159,7 +159,8 @@ export function TableProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     setError(null);
     try {
-      return await searchProducts(term);
+      const results = await searchProducts(term);
+      return results;
     } catch (err) {
       console.error("Erro ao pesquisar produtos:", err);
       setError("Não foi possível realizar a pesquisa.");

@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Column, TableData } from "@/context/TableContext";
+import { Json } from "@/integrations/supabase/types";
 
 export type MeasurementTable = {
   id: string;
@@ -26,6 +27,27 @@ export type TableRow = {
   data: Record<string, any>;
   created_at: string;
   updated_at: string;
+};
+
+// Helper function to convert Json to Record<string, string | number>
+const convertJsonToRecord = (jsonData: Json): Record<string, string | number> => {
+  if (typeof jsonData !== 'object' || jsonData === null) {
+    throw new Error("Dados inválidos: não é um objeto");
+  }
+  
+  // Converter e filtrar apenas string e number
+  const result: Record<string, string | number> = {};
+  
+  for (const [key, value] of Object.entries(jsonData)) {
+    if (typeof value === 'string' || typeof value === 'number') {
+      result[key] = value;
+    } else if (value !== null && value !== undefined) {
+      // Converter outros tipos para string
+      result[key] = String(value);
+    }
+  }
+  
+  return result;
 };
 
 // Buscar todas as tabelas
@@ -66,7 +88,7 @@ export const fetchTables = async (): Promise<TableData[]> => {
       }));
 
       // Mapear linhas (extrair os dados do campo JSONB)
-      const mappedRows = rows.map(row => row.data);
+      const mappedRows = rows.map(row => convertJsonToRecord(row.data));
 
       result.push({
         id: table.id,
@@ -123,7 +145,7 @@ export const fetchTableById = async (id: string): Promise<TableData | null> => {
       accessor: col.accessor
     }));
 
-    const mappedRows = rows.map(row => row.data);
+    const mappedRows = rows.map(row => convertJsonToRecord(row.data));
 
     return {
       id: table.id,
@@ -335,7 +357,7 @@ export const searchProducts = async (term: string): Promise<{ tableId: string, t
         results.push({
           tableId: table.id,
           tableName: table.name,
-          rows: rows.map(row => row.data)
+          rows: rows.map(row => convertJsonToRecord(row.data))
         });
       }
     }

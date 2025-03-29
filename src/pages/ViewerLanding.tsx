@@ -5,21 +5,32 @@ import ViewerHeader from '../components/ViewerHeader';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 
 const ViewerLanding = () => {
-  const { tables, searchProduct, showGridLines, toggleGridLines } = useTableData();
+  const { tables, searchProduct, showGridLines } = useTableData();
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<ReturnType<typeof searchProduct>>([]);
+  const [searchResults, setSearchResults] = useState<{ tableId: string; tableName: string; rows: Record<string, string | number>[]; }[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   // Handle search
   useEffect(() => {
-    if (searchTerm.trim()) {
-      setIsSearching(true);
-      const results = searchProduct(searchTerm);
-      setSearchResults(results);
-    } else {
-      setIsSearching(false);
-      setSearchResults([]);
-    }
+    const performSearch = async () => {
+      if (searchTerm.trim()) {
+        setIsSearching(true);
+        try {
+          const results = await searchProduct(searchTerm);
+          setSearchResults(results);
+        } catch (error) {
+          console.error("Erro ao buscar:", error);
+          setSearchResults([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setIsSearching(false);
+        setSearchResults([]);
+      }
+    };
+
+    performSearch();
   }, [searchTerm, searchProduct]);
 
   // Helper function to highlight search term
