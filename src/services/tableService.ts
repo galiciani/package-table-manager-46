@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Column, TableData } from "@/context/TableContext";
 import { Json } from "@/integrations/supabase/types";

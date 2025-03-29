@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -47,7 +46,6 @@ export function TableProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Carregar tabelas ao iniciar
   useEffect(() => {
     const loadTables = async () => {
       setIsLoading(true);
@@ -90,14 +88,12 @@ export function TableProvider({ children }: { children: React.ReactNode }) {
     try {
       await updateTable(id, updatedData);
       
-      // Atualizar o estado local
       setTables(prevTables => 
         prevTables.map(table => 
           table.id === id ? { ...table, ...updatedData } : table
         )
       );
       
-      // Se a tabela selecionada foi atualizada, atualizar também
       if (selectedTable?.id === id) {
         setSelectedTable(prev => prev ? { ...prev, ...updatedData } : null);
       }
@@ -153,7 +149,7 @@ export function TableProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const searchProduct = async (term: string) => {
+  const searchProduct = async (term: string): Promise<{ tableId: string, tableName: string, rows: Record<string, string | number>[] }[]> => {
     if (!term.trim()) return [];
 
     setIsLoading(true);

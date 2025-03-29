@@ -58,6 +58,16 @@ const ViewerLanding = () => {
             // Search results view
             <div className="space-y-4">
               <h2 className="text-lg font-medium text-gray-900">
+                Buscando resultados para "{searchTerm}"...
+              </h2>
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+              </div>
+            </div>
+          ) : searchTerm.trim() ? (
+            // Search results view
+            <div className="space-y-4">
+              <h2 className="text-lg font-medium text-gray-900">
                 {searchResults.reduce((sum, r) => sum + r.rows.length, 0)} resultados encontrados para "{searchTerm}"
               </h2>
               
