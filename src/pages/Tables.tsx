@@ -11,7 +11,8 @@ import {
   Plus, 
   Edit, 
   Trash2,
-  ChevronLeft
+  ChevronLeft,
+  Loader2
 } from 'lucide-react';
 import {
   Dialog,
@@ -25,7 +26,7 @@ import { toast } from 'sonner';
 
 const Tables = () => {
   const location = useLocation();
-  const { tables, selectedTable, selectTable, deleteTable } = useTableData();
+  const { tables, selectedTable, selectTable, deleteTable, isLoading, error } = useTableData();
   const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [tableToEdit, setTableToEdit] = useState<TableData | null>(null);
@@ -48,11 +49,14 @@ const Tables = () => {
     setShowForm(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (confirmDelete) {
-      deleteTable(confirmDelete);
-      toast.success('Tabela excluída com sucesso');
-      setConfirmDelete(null);
+      try {
+        await deleteTable(confirmDelete);
+        setConfirmDelete(null);
+      } catch (error) {
+        console.error("Erro ao excluir tabela:", error);
+      }
     }
   };
 
@@ -64,6 +68,37 @@ const Tables = () => {
   const handleBackToList = () => {
     selectTable(null);
   };
+
+  // Renderiza estado de carregamento
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center h-64">
+          <Loader2 size={40} className="animate-spin text-primary mb-4" />
+          <p className="text-lg text-gray-600">Carregando...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Renderiza erro
+  if (error) {
+    return (
+      <Layout>
+        <div className="bg-red-50 border border-red-200 rounded-md p-4 my-4">
+          <h3 className="text-lg font-medium text-red-800 mb-2">Ocorreu um erro</h3>
+          <p className="text-red-700">{error}</p>
+          <Button 
+            variant="outline" 
+            className="mt-4" 
+            onClick={() => window.location.reload()}
+          >
+            Tentar novamente
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

@@ -9,7 +9,127 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      measurement_tables: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          is_approved: boolean | null
+          name: string
+          role: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          is_approved?: boolean | null
+          name: string
+          role: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          name?: string
+          role?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
+      table_columns: {
+        Row: {
+          accessor: string
+          created_at: string
+          id: string
+          name: string
+          sequence_order: number
+          table_id: string
+        }
+        Insert: {
+          accessor: string
+          created_at?: string
+          id?: string
+          name: string
+          sequence_order: number
+          table_id: string
+        }
+        Update: {
+          accessor?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sequence_order?: number
+          table_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "table_columns_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "measurement_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      table_rows: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          table_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data: Json
+          id?: string
+          table_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          table_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "table_rows_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "measurement_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

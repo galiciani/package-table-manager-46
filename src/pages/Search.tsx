@@ -6,13 +6,14 @@ import { useTableData } from '../context/TableContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Search as SearchIcon } from 'lucide-react';
+import { Search as SearchIcon, Loader2 } from 'lucide-react';
 
 const Search = () => {
-  const { searchProduct, showGridLines, toggleGridLines } = useTableData();
+  const { searchProduct, showGridLines, toggleGridLines, isLoading, error } = useTableData();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedTerm, setDebouncedTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<ReturnType<typeof searchProduct>>([]);
+  const [searchResults, setSearchResults] = useState<ReturnType<typeof searchProduct> extends Promise<infer R> ? R : never>([]);
+  const [searching, setSearching] = useState(false);
 
   // Debounce search term
   useEffect(() => {
@@ -25,19 +26,68 @@ const Search = () => {
 
   // Perform search when debounced term changes
   useEffect(() => {
-    if (debouncedTerm) {
-      const results = searchProduct(debouncedTerm);
-      setSearchResults(results);
-    } else {
-      setSearchResults([]);
-    }
+    const performSearch = async () => {
+      if (debouncedTerm) {
+        setSearching(true);
+        try {
+          const results = await searchProduct(debouncedTerm);
+          setSearchResults(results);
+        } catch (error) {
+          console.error("Erro ao realizar pesquisa:", error);
+        } finally {
+          setSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    };
+
+    performSearch();
   }, [debouncedTerm, searchProduct]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    const results = searchProduct(searchTerm);
-    setSearchResults(results);
+    setSearching(true);
+    try {
+      const results = await searchProduct(searchTerm);
+      setSearchResults(results);
+    } catch (error) {
+      console.error("Erro ao realizar pesquisa:", error);
+    } finally {
+      setSearching(false);
+    }
   };
+
+  // Renderizar estado de carregamento
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center h-64">
+          <Loader2 size={40} className="animate-spin text-primary mb-4" />
+          <p className="text-lg text-gray-600">Carregando...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Renderizar erro
+  if (error) {
+    return (
+      <Layout>
+        <div className="bg-red-50 border border-red-200 rounded-md p-4 my-4">
+          <h3 className="text-lg font-medium text-red-800 mb-2">Ocorreu um erro</h3>
+          <p className="text-red-700">{error}</p>
+          <Button 
+            variant="outline" 
+            className="mt-4" 
+            onClick={() => window.location.reload()}
+          >
+            Tentar novamente
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -53,7 +103,10 @@ const Search = () => {
                 className="pl-10"
               />
             </div>
-            <Button type="submit">Buscar</Button>
+            <Button type="submit" disabled={searching}>
+              {searching ? <Loader2 size={16} className="animate-spin mr-2" /> : null}
+              Buscar
+            </Button>
           </form>
           
           <div className="flex items-center gap-2 mt-4 justify-end">
