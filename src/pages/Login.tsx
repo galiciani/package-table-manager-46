@@ -1,56 +1,63 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email || !password) {
-      toast.error("Por favor, preencha todos os campos");
-      return;
-    }
-    
-    setIsLoading(true);
+    setLoading(true);
     
     try {
       const success = await login(email, password);
       
       if (success) {
-        toast.success("Login realizado com sucesso");
-        navigate('/dashboard');
+        toast({
+          title: 'Login bem-sucedido',
+          description: 'Bem-vindo de volta!',
+        });
+        navigate('/');
       } else {
-        toast.error("Email ou senha inválidos");
+        toast({
+          title: 'Erro no login',
+          description: 'Email ou senha incorretos.',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
-      toast.error("Erro ao fazer login");
-      console.error(error);
+      toast({
+        title: 'Erro no login',
+        description: 'Ocorreu um erro ao tentar fazer login.',
+        variant: 'destructive',
+      });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-lg">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Package Table Manager</h1>
-          <p className="mt-2 text-gray-600">Faça login para acessar o sistema</p>
-        </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h1 className="text-center text-3xl font-bold text-gray-900">PackageTables</h1>
+        <h2 className="mt-6 text-center text-2xl font-bold text-gray-900">
+          Faça login em sua conta
+        </h2>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <Label htmlFor="email">Email</Label>
               <Input
@@ -58,8 +65,7 @@ const Login = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                autoComplete="email"
+                className="mt-1"
                 required
               />
             </div>
@@ -71,31 +77,83 @@ const Login = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Senha"
-                autoComplete="current-password"
+                className="mt-1"
                 required
               />
             </div>
-          </div>
+            
+            <div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={loading}
+              >
+                {loading ? 'Entrando...' : 'Entrar'}
+              </Button>
+            </div>
+            
+            <div className="text-center text-sm">
+              <p className="text-gray-600">
+                Ainda não tem uma conta? <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500">Cadastre-se</Link>
+              </p>
+            </div>
+          </form>
           
-          <div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Entrando...' : 'Entrar'}
-            </Button>
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">
+                  Ou continue com
+                </span>
+              </div>
+            </div>
+            
+            <div className="mt-6 grid grid-cols-3 gap-3">
+              <div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setEmail('admin@example.com');
+                    setPassword('password');
+                  }}
+                  className="w-full"
+                >
+                  Admin
+                </Button>
+              </div>
+              <div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setEmail('editor@example.com');
+                    setPassword('password');
+                  }}
+                  className="w-full"
+                >
+                  Editor
+                </Button>
+              </div>
+              <div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setEmail('viewer@example.com');
+                    setPassword('password');
+                  }}
+                  className="w-full"
+                >
+                  Viewer
+                </Button>
+              </div>
+            </div>
           </div>
-          
-          <div className="text-center text-sm text-gray-500">
-            <p>Para fins de demonstração, utilize:</p>
-            <p className="font-medium">admin@example.com (administrador)</p>
-            <p className="font-medium">editor@example.com (editor)</p>
-            <p className="font-medium">viewer@example.com (visualizador)</p>
-            <p className="mt-1">Senha: qualquer valor</p>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );

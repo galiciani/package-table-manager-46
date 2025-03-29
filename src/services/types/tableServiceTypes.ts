@@ -1,6 +1,4 @@
 
-import { Json } from "@/integrations/supabase/types";
-
 export type MeasurementTable = {
   id: string;
   name: string;

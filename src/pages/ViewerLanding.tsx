@@ -53,7 +53,7 @@ const ViewerLanding = () => {
       />
       
       <main className="py-4">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl xl:max-w-[1200px] space-y-6">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl space-y-6">
           {isSearching ? (
             // Search results view
             <div className="space-y-4">
@@ -82,12 +82,12 @@ const ViewerLanding = () => {
                         <h3 className="text-base font-medium text-gray-900">{result.tableName}</h3>
                       </div>
                       
-                      <div className="overflow-x-auto">
-                        <Table>
+                      <div className="overflow-x-auto w-full">
+                        <Table className="w-full">
                           <TableHeader>
                             <TableRow className="h-9">
                               {table.columns.map(column => (
-                                <TableHead key={column.id} className="py-2 px-3 text-xs">
+                                <TableHead key={column.id} className="py-2 px-3 text-xs whitespace-nowrap">
                                   {column.name}
                                 </TableHead>
                               ))}
@@ -97,7 +97,7 @@ const ViewerLanding = () => {
                             {result.rows.map((row, rowIndex) => (
                               <TableRow key={rowIndex} className="h-8">
                                 {table.columns.map(column => (
-                                  <TableCell key={`${rowIndex}-${column.id}`} className="py-1 px-3 text-sm">
+                                  <TableCell key={`${rowIndex}-${column.id}`} className="py-1 px-3 text-sm whitespace-nowrap">
                                     {row[column.accessor] !== undefined 
                                       ? highlightText(String(row[column.accessor])) 
                                       : '-'}
@@ -131,12 +131,12 @@ const ViewerLanding = () => {
                     )}
                   </div>
                   
-                  <div className="overflow-x-auto">
-                    <Table>
+                  <div className="overflow-x-auto w-full">
+                    <Table className="w-full min-w-full">
                       <TableHeader>
                         <TableRow className="h-9">
                           {table.columns.map(column => (
-                            <TableHead key={column.id} className="py-2 px-3 text-xs">
+                            <TableHead key={column.id} className="py-2 px-3 text-xs whitespace-nowrap">
                               {column.name}
                             </TableHead>
                           ))}
@@ -146,7 +146,7 @@ const ViewerLanding = () => {
                         {table.rows.map((row, rowIndex) => (
                           <TableRow key={rowIndex} className={`h-8 ${rowIndex % 2 === 0 ? '' : 'bg-gray-50'}`}>
                             {table.columns.map(column => (
-                              <TableCell key={`${rowIndex}-${column.id}`} className="py-1 px-3 text-sm">
+                              <TableCell key={`${rowIndex}-${column.id}`} className="py-1 px-3 text-sm whitespace-nowrap">
                                 {row[column.accessor] !== undefined ? row[column.accessor] : '-'}
                               </TableCell>
                             ))}
