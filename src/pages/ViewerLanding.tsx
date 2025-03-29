@@ -1,14 +1,22 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTableData } from '../context/TableContext';
+import { useAuth } from '../context/AuthContext';
 import ViewerHeader from '../components/ViewerHeader';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 
 const ViewerLanding = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { tables, searchProduct, showGridLines } = useTableData();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<{ tableId: string; tableName: string; rows: Record<string, string | number>[]; }[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  
+  const isAdminOrEditor = user?.role === 'admin' || user?.role === 'editor';
 
   // Handle search
   useEffect(() => {
@@ -54,6 +62,20 @@ const ViewerLanding = () => {
       
       <main className="py-4">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl space-y-6">
+          {isAdminOrEditor && (
+            <div className="flex justify-start mb-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate('/dashboard')}
+                className="flex items-center gap-1"
+              >
+                <ArrowLeft size={16} />
+                Voltar para Dashboard
+              </Button>
+            </div>
+          )}
+          
           {isSearching ? (
             // Search results view
             <div className="space-y-4">
@@ -83,7 +105,7 @@ const ViewerLanding = () => {
                       </div>
                       
                       <div className="overflow-x-auto w-full">
-                        <Table className="w-full">
+                        <Table className="w-full min-w-full">
                           <TableHeader>
                             <TableRow className="h-9">
                               {table.columns.map(column => (

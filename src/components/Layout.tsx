@@ -33,7 +33,7 @@ const NavLink = ({ to, icon, label, isActive, onClick }: NavLinkProps) => {
       onClick={onClick}
     >
       <div className="mr-3">{icon}</div>
-      <span>{label}</span>
+      <span>{span}</span>
     </Link>
   );
 };
@@ -121,7 +121,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 to="/"
                 icon={<Eye size={20} />}
                 label="Ver Tabelas (Visualização)"
-                isActive={false}
+                isActive={location.pathname === '/'}
                 onClick={closeSidebar}
               />
             </div>
