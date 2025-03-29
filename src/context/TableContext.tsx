@@ -1,27 +1,11 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { 
-  fetchTables, 
-  fetchTableById, 
-  createTable, 
-  updateTable, 
-  deleteTable,
-  searchProducts
-} from '../services/tableService';
-
-export interface Column {
-  id: string;
-  name: string;
-  accessor: string;
-}
-
-export interface TableData {
-  id: string;
-  name: string;
-  description: string;
-  columns: Column[];
-  rows: Record<string, string | number>[];
-}
+import { fetchTables } from '@/services/tableService';
+import { TableData, SearchResult } from '@/types/tableTypes';
+import { useTableOperations } from '@/hooks/useTableOperations';
+import { useTableSearch } from '@/hooks/useTableSearch';
+import { useTableUISettings } from '@/hooks/useTableUISettings';
 
 interface TableContextType {
   tables: TableData[];
@@ -30,7 +14,7 @@ interface TableContextType {
   updateTable: (id: string, table: Partial<TableData>) => Promise<void>;
   deleteTable: (id: string) => Promise<void>;
   selectTable: (id: string | null) => void;
-  searchProduct: (term: string) => Promise<{ tableId: string, tableName: string, rows: Record<string, string | number>[] }[]>;
+  searchProduct: (term: string) => Promise<SearchResult[]>;
   showGridLines: boolean;
   toggleGridLines: () => void;
   isLoading: boolean;
@@ -42,90 +26,75 @@ const TableContext = createContext<TableContextType | undefined>(undefined);
 export function TableProvider({ children }: { children: React.ReactNode }) {
   const [tables, setTables] = useState<TableData[]>([]);
   const [selectedTable, setSelectedTable] = useState<TableData | null>(null);
-  const [showGridLines, setShowGridLines] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loadingTables, setLoadingTables] = useState(false);
+  const [tablesError, setTablesError] = useState<string | null>(null);
+  
+  // Import custom hooks
+  const { 
+    addTable: addTableOperation, 
+    updateTableData, 
+    deleteTableById, 
+    selectTable: fetchTable,
+    isLoading: operationsLoading,
+    error: operationsError
+  } = useTableOperations();
+  
+  const {
+    searchProduct,
+    isLoading: searchLoading,
+    error: searchError
+  } = useTableSearch();
+  
+  const { showGridLines, toggleGridLines } = useTableUISettings();
+
+  // Compute combined loading and error states
+  const isLoading = loadingTables || operationsLoading || searchLoading;
+  const error = tablesError || operationsError || searchError;
 
   useEffect(() => {
     const loadTables = async () => {
-      setIsLoading(true);
-      setError(null);
+      setLoadingTables(true);
+      setTablesError(null);
       try {
         const data = await fetchTables();
         setTables(data);
       } catch (err) {
         console.error("Erro ao carregar tabelas:", err);
-        setError("Não foi possível carregar as tabelas.");
+        setTablesError("Não foi possível carregar as tabelas.");
         toast.error("Erro ao carregar tabelas");
       } finally {
-        setIsLoading(false);
+        setLoadingTables(false);
       }
     };
 
     loadTables();
   }, []);
 
+  // Wrapper functions for operations that update the local state
   const addTable = async (tableData: Omit<TableData, 'id'>) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const newTable = await createTable(tableData);
-      setTables(prevTables => [...prevTables, newTable]);
-      toast.success("Tabela criada com sucesso");
-    } catch (err) {
-      console.error("Erro ao adicionar tabela:", err);
-      setError("Não foi possível criar a tabela.");
-      toast.error("Erro ao criar tabela");
-      throw err;
-    } finally {
-      setIsLoading(false);
+    const newTable = await addTableOperation(tableData);
+    setTables(prevTables => [...prevTables, newTable]);
+  };
+
+  const updateTable = async (id: string, updatedData: Partial<TableData>) => {
+    await updateTableData(id, updatedData);
+    
+    setTables(prevTables => 
+      prevTables.map(table => 
+        table.id === id ? { ...table, ...updatedData } : table
+      )
+    );
+    
+    if (selectedTable?.id === id) {
+      setSelectedTable(prev => prev ? { ...prev, ...updatedData } : null);
     }
   };
 
-  const updateTableData = async (id: string, updatedData: Partial<TableData>) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await updateTable(id, updatedData);
-      
-      setTables(prevTables => 
-        prevTables.map(table => 
-          table.id === id ? { ...table, ...updatedData } : table
-        )
-      );
-      
-      if (selectedTable?.id === id) {
-        setSelectedTable(prev => prev ? { ...prev, ...updatedData } : null);
-      }
-      
-      toast.success("Tabela atualizada com sucesso");
-    } catch (err) {
-      console.error("Erro ao atualizar tabela:", err);
-      setError("Não foi possível atualizar a tabela.");
-      toast.error("Erro ao atualizar tabela");
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const deleteTableById = async (id: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      await deleteTable(id);
-      setTables(prevTables => prevTables.filter(table => table.id !== id));
-      if (selectedTable?.id === id) {
-        setSelectedTable(null);
-      }
-      toast.success("Tabela excluída com sucesso");
-    } catch (err) {
-      console.error("Erro ao excluir tabela:", err);
-      setError("Não foi possível excluir a tabela.");
-      toast.error("Erro ao excluir tabela");
-      throw err;
-    } finally {
-      setIsLoading(false);
+  const deleteTable = async (id: string) => {
+    await deleteTableById(id);
+    setTables(prevTables => prevTables.filter(table => table.id !== id));
+    if (selectedTable?.id === id) {
+      setSelectedTable(null);
     }
   };
 
@@ -135,40 +104,8 @@ export function TableProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     
-    setIsLoading(true);
-    setError(null);
-    try {
-      const table = await fetchTableById(id);
-      setSelectedTable(table);
-    } catch (err) {
-      console.error("Erro ao selecionar tabela:", err);
-      setError("Não foi possível carregar os detalhes da tabela.");
-      toast.error("Erro ao carregar tabela");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const searchProduct = async (term: string): Promise<{ tableId: string, tableName: string, rows: Record<string, string | number>[] }[]> => {
-    if (!term.trim()) return [];
-
-    setIsLoading(true);
-    setError(null);
-    try {
-      const results = await searchProducts(term);
-      return results;
-    } catch (err) {
-      console.error("Erro ao pesquisar produtos:", err);
-      setError("Não foi possível realizar a pesquisa.");
-      toast.error("Erro ao pesquisar produtos");
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const toggleGridLines = () => {
-    setShowGridLines(prev => !prev);
+    const table = await fetchTable(id);
+    setSelectedTable(table);
   };
 
   return (
@@ -177,8 +114,8 @@ export function TableProvider({ children }: { children: React.ReactNode }) {
         tables, 
         selectedTable, 
         addTable, 
-        updateTable: updateTableData, 
-        deleteTable: deleteTableById, 
+        updateTable, 
+        deleteTable, 
         selectTable,
         searchProduct,
         showGridLines,
@@ -199,3 +136,6 @@ export function useTableData() {
   }
   return context;
 }
+
+// Export types for use in other files
+export type { TableData, Column } from '@/types/tableTypes';

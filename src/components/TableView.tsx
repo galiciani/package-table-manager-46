@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useTableData } from '../context/TableContext';
-import { TableData } from '../context/TableContext';
+import { TableData } from '@/types/tableTypes';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useIsMobile } from '@/hooks/use-mobile';
