@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { TableData } from '@/types/tableTypes';
@@ -20,10 +19,11 @@ export function useTableOperations() {
       const newTable = await createTableService(tableData);
       toast.success("Tabela criada com sucesso");
       return newTable;
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao adicionar tabela:", err);
-      setError("Não foi possível criar a tabela.");
-      toast.error("Erro ao criar tabela");
+      const errorMessage = err.message || "Não foi possível criar a tabela.";
+      setError(errorMessage);
+      toast.error(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);

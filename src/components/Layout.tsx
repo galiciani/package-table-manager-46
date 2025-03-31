@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -33,7 +32,7 @@ const NavLink = ({ to, icon, label, isActive, onClick }: NavLinkProps) => {
       onClick={onClick}
     >
       <div className="mr-3">{icon}</div>
-      <span>{span}</span>
+      <span>{label}</span>
     </Link>
   );
 };
@@ -64,7 +63,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar for large screens */}
       <aside
         className={`fixed inset-y-0 left-0 z-10 w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -149,9 +147,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </aside>
 
-      {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Top navbar */}
         <header className="bg-white shadow-sm">
           <div className="flex h-16 items-center justify-between px-4">
             <button
@@ -176,7 +172,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </header>
 
-        {/* Page content */}
         <main className="flex-1 overflow-y-auto p-4">{children}</main>
       </div>
     </div>

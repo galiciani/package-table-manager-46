@@ -7,7 +7,12 @@ import { TableData } from "@/types/tableTypes";
  */
 export const createTable = async (table: Omit<TableData, 'id'>): Promise<TableData> => {
   try {
-    const { data: userData } = await supabase.auth.getUser();
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError) {
+      console.error("Error fetching user:", userError);
+      throw new Error("Não foi possível obter dados do usuário: " + userError.message);
+    }
+    
     if (!userData?.user) {
       throw new Error("Usuário não autenticado");
     }
@@ -22,7 +27,10 @@ export const createTable = async (table: Omit<TableData, 'id'>): Promise<TableDa
       .select()
       .single();
 
-    if (tableError) throw tableError;
+    if (tableError) {
+      console.error("Error creating table:", tableError);
+      throw new Error("Erro ao criar tabela: " + tableError.message);
+    }
 
     const columnsToInsert = table.columns.map((col, index) => ({
       table_id: newTable.id,
@@ -36,7 +44,10 @@ export const createTable = async (table: Omit<TableData, 'id'>): Promise<TableDa
       .insert(columnsToInsert)
       .select();
 
-    if (columnsError) throw columnsError;
+    if (columnsError) {
+      console.error("Error creating columns:", columnsError);
+      throw new Error("Erro ao criar colunas: " + columnsError.message);
+    }
 
     if (table.rows.length > 0) {
       const rowsToInsert = table.rows.map(row => ({
@@ -48,7 +59,10 @@ export const createTable = async (table: Omit<TableData, 'id'>): Promise<TableDa
         .from('table_rows')
         .insert(rowsToInsert);
 
-      if (rowsError) throw rowsError;
+      if (rowsError) {
+        console.error("Error creating rows:", rowsError);
+        throw new Error("Erro ao criar linhas: " + rowsError.message);
+      }
     }
 
     const mappedColumns = newColumns.map(col => ({

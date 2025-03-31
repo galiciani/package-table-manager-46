@@ -82,8 +82,8 @@ const TableView = ({ table, hideControls = false }: TableViewProps) => {
         )}
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
+      <div className="overflow-x-auto w-full">
+        <table className="w-full min-w-full">
           <thead className="bg-gray-50 text-left">
             <tr>
               {table.columns.map((column) => (
